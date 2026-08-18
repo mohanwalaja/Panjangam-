@@ -209,4 +209,56 @@ object AstroUtils {
         if (hourLocal >= 24) hourLocal -= 24.0
         return hourLocal
     }
+
+    /** Converts a Julian Day to a UTC epoch millisecond timestamp. */
+    fun jdToEpochMillis(jd: Double): Long = ((jd - 2440587.5) * 86400000.0).toLong()
+
+    /** Wraps a degree difference into the range (-180, 180]. */
+    private fun signedDeg(deg: Double): Double {
+        var d = (deg + 180.0) % 360.0
+        if (d < 0) d += 360.0
+        return d - 180.0
+    }
+
+    /**
+     * Finds the Julian Day at which `valueFn` (a slowly-changing degree
+     * quantity, e.g. Moon's longitude) crosses `boundaryDeg`, searching
+     * from `startJd` in the given direction (-1 = backward in time,
+     * +1 = forward). Used to find exact Tithi/Nakshatra start and end
+     * times. Coarse-steps to bracket the crossing, then refines with
+     * bisection to sub-minute precision.
+     */
+    fun findCrossingJd(
+        startJd: Double, boundaryDeg: Double, direction: Int, valueFn: (Double) -> Double
+    ): Double {
+        val stepDays = 0.02 // ~29 minutes
+        var t0 = startJd
+        var f0 = signedDeg(valueFn(t0) - boundaryDeg)
+        var t1 = t0
+        var f1 = f0
+        var iterations = 0
+        while (iterations < 400) {
+            t1 = t0 + direction * stepDays
+            f1 = signedDeg(valueFn(t1) - boundaryDeg)
+            if (f0 == 0.0 || (f0 < 0) != (f1 < 0)) break
+            t0 = t1
+            f0 = f1
+            iterations++
+        }
+
+        var lo = t0
+        var hi = t1
+        var fLo = f0
+        repeat(60) {
+            val mid = (lo + hi) / 2.0
+            val fMid = signedDeg(valueFn(mid) - boundaryDeg)
+            if ((fLo < 0) == (fMid < 0)) {
+                lo = mid
+                fLo = fMid
+            } else {
+                hi = mid
+            }
+        }
+        return (lo + hi) / 2.0
+    }
 }

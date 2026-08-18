@@ -114,9 +114,9 @@ class MainActivity : AppCompatActivity() {
         setRow(binding.rowRithu, "Rithu", result.rithu)
         setRow(binding.rowMasam, "Masam", result.masam)
         setRow(binding.rowPaksham, "Paksham", result.paksham)
-        setRow(binding.rowThithi, "Thithi", result.thithi)
+        setRow(binding.rowThithi, "Thithi", "${result.thithi}\n(${result.thithiStart} - ${result.thithiEnd})")
         setRow(binding.rowVasaram, "Vasaram", result.vasaram)
-        setRow(binding.rowNakshatram, "Nakshatram", result.nakshatram)
+        setRow(binding.rowNakshatram, "Nakshatram", "${result.nakshatram}\n(${result.nakshatramStart} - ${result.nakshatramEnd})")
         setRow(binding.rowYogam, "Yogam", result.yogam)
         setRow(binding.rowKaranam, "Karanam", result.karanam)
     }

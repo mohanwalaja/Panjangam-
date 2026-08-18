@@ -14,7 +14,11 @@ data class PanchangamResult(
     val vasaram: String,
     val nakshatram: String,
     val yogam: String,
-    val karanam: String
+    val karanam: String,
+    val thithiStart: String,
+    val thithiEnd: String,
+    val nakshatramStart: String,
+    val nakshatramEnd: String
 )
 
 /**
@@ -149,9 +153,12 @@ object PanchangamCalculator {
             else -> karanaNames[9]                        // Naga
         }
 
-        // --- Vasara (weekday), counted sunrise-to-sunrise ---
-        val weekdayCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        weekdayCal.timeInMillis = sunriseCal.timeInMillis
+        // --- Vasara (weekday): the calendar weekday of the selected
+        // date itself, computed directly (not derived from any other
+        // intermediate value), so it always matches the date shown.
+        val weekdayCal = Calendar.getInstance()
+        weekdayCal.clear()
+        weekdayCal.set(year, month - 1, day)
         val dayOfWeek = weekdayCal.get(Calendar.DAY_OF_WEEK) // 1=Sunday
         val vasaraName = vasaraNames[(dayOfWeek - 1).coerceIn(0, 6)]
 
@@ -165,13 +172,11 @@ object PanchangamCalculator {
         }
 
         // --- Masa: named from the sidereal rashi (zodiac sign) occupied
-        // by the Sun, which closely tracks the lunar month name in the
-        // Amanta system for most of the year.
+        // by the Sun. Sun in Mesha (Aries) -> Vaishakha, Sun in Vrishabha
+        // (Taurus) -> Jyeshtha, ... Sun in Meena (Pisces) -> Chaitra.
+        // i.e. masaIndex = rashiIndex + 1 (mod 12), NOT rashiIndex - 1.
         val rashiIndex = floor(sunLong / 30.0).toInt().coerceIn(0, 11)
-        // Chaitra masa begins near Sun entering Meena/Mesha; offset the
-        // rashi index so index 0 (Mesha) aligns with Chaitra/Vaishakha
-        // transition used by most Panchangams.
-        val masaIndex = (rashiIndex + 11) % 12
+        val masaIndex = (rashiIndex + 1) % 12
         val masaName = masaNames[masaIndex]
 
         // --- Ritu (season): pairs of masas, 2 per ritu ---
@@ -181,11 +186,35 @@ object PanchangamCalculator {
         // --- Samvatsara: 60-year Jupiter cycle. Uses the common
         // approximation: Saka year = Gregorian year - 78 (adjusted near
         // the Gregorian new year, since the Hindu year starts around
-        // March/April); index = (Saka year + 12) mod 60 in the commonly
-        // used South Indian reckoning.
+        // March/April); index = (Saka year + 11) mod 60, calibrated
+        // against the known 2025-26 = Vishvavasu / 2026-27 = Parabhava.
         val sakaYear = if (month >= 4) year - 78 else year - 79
-        val samvatsaraIndex = ((sakaYear + 12) % 60 + 60) % 60
+        val samvatsaraIndex = ((sakaYear + 11) % 60 + 60) % 60
         val samvatsaraName = samvatsaraNames[samvatsaraIndex]
+
+        // --- Exact start/end times of the current Tithi and Nakshatra,
+        // found by locating the precise astronomical moments the Moon
+        // (or Moon-Sun difference, for Tithi) crosses the segment
+        // boundary either side of sunrise. ---
+        val diffFn: (Double) -> Double = { t ->
+            var d = AstroUtils.moonSiderealLongitude(t) - AstroUtils.sunSiderealLongitude(t)
+            if (d < 0) d += 360.0
+            d
+        }
+        val moonFn: (Double) -> Double = { t -> AstroUtils.moonSiderealLongitude(t) }
+
+        val tithiStartDeg = tithiIndex * 12.0
+        val tithiEndDeg = ((tithiIndex + 1) * 12.0) % 360.0
+        val tithiStartJd = AstroUtils.findCrossingJd(jdSunrise, tithiStartDeg, -1, diffFn)
+        val tithiEndJd = AstroUtils.findCrossingJd(jdSunrise, tithiEndDeg, 1, diffFn)
+
+        val nakStartDeg = nakshatraIndex * nakshatraSpan
+        val nakEndDeg = ((nakshatraIndex + 1) * nakshatraSpan) % 360.0
+        val nakStartJd = AstroUtils.findCrossingJd(jdSunrise, nakStartDeg, -1, moonFn)
+        val nakEndJd = AstroUtils.findCrossingJd(jdSunrise, nakEndDeg, 1, moonFn)
+
+        val fmt = java.text.SimpleDateFormat("d MMM, h:mm a", java.util.Locale.getDefault())
+        fun formatJd(jd: Double): String = fmt.format(java.util.Date(AstroUtils.jdToEpochMillis(jd)))
 
         return PanchangamResult(
             samvatsaram = samvatsaraName,
@@ -197,7 +226,11 @@ object PanchangamCalculator {
             vasaram = vasaraName,
             nakshatram = nakshatraName,
             yogam = yogaName,
-            karanam = karanaName
+            karanam = karanaName,
+            thithiStart = formatJd(tithiStartJd),
+            thithiEnd = formatJd(tithiEndJd),
+            nakshatramStart = formatJd(nakStartJd),
+            nakshatramEnd = formatJd(nakEndJd)
         )
     }
 }
