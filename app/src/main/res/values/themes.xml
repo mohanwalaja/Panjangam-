@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Panchangam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#8B2500</item>
+        <item name="colorPrimaryDark">#5A1800</item>
+        <item name="colorAccent">#D4A017</item>
+    </style>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8E7">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Vedic Panchangam"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#8B2500"
+            android:gravity="center"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:gravity="center"
+            android:textColor="#5A3E1B"
+            android:paddingBottom="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp">
+
+            <Button
+                android:id="@+id/prevDayButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="◀ Previous Day" />
+
+            <Button
+                android:id="@+id/nextDayButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Next Day ▶" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/todayButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Today"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/locationButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Use My Location"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/locationLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location: Chennai, India (default)"
+            android:textSize="13sp"
+            android:textColor="#8A6D3B"
+            android:gravity="center"
+            android:paddingBottom="16dp" />
+
+        <!-- Panchangam element rows -->
+        <include android:id="@+id/rowSamvatsaram" layout="@layout/row_element" />
+        <include android:id="@+id/rowAyanam" layout="@layout/row_element" />
+        <include android:id="@+id/rowRithu" layout="@layout/row_element" />
+        <include android:id="@+id/rowMasam" layout="@layout/row_element" />
+        <include android:id="@+id/rowPaksham" layout="@layout/row_element" />
+        <include android:id="@+id/rowThithi" layout="@layout/row_element" />
+        <include android:id="@+id/rowVasaram" layout="@layout/row_element" />
+        <include android:id="@+id/rowNakshatram" layout="@layout/row_element" />
+        <include android:id="@+id/rowYogam" layout="@layout/row_element" />
+        <include android:id="@+id/rowKaranam" layout="@layout/row_element" />
+
+    </LinearLayout>
+</ScrollView>
