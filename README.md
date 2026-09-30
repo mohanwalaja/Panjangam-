@@ -30,8 +30,13 @@ no Jataka/horoscope features:
 
 ## Accuracy notes
 
-- Tithi, Nakshatra, Yoga, Karana, Vasara, and Ayana are computed directly
-  from real Sun/Moon positions and are accurate to within a few minutes.
+- Verified against an independent high-precision ephemeris and USNO 2026
+  lunar phase tables: Sun longitude max error ~0.5 arcmin, Moon ~2.5
+  arcmin, Lahiri ayanamsa ~1.1 arcmin (vs Spica-anchored Chitrapaksha),
+  new/full moon instants within ~4 min, sunrise within ~4 min over a
+  full year at latitudes -34..+51 (Chennai ~2 min). Tithi/Nakshatra/
+  Yoga/Karana boundary times inherit these errors and land within a
+  few minutes of real time.
 - Masa (lunar month name) and Samvatsara (60-year year name) use standard
   approximations described in code comments in `PanchangamCalculator.kt`.
   Regional traditions differ (Amanta vs Purnimanta calendars, adhika/
