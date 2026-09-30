@@ -3,6 +3,8 @@ name: Build Panchangam APK
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch: {}
 
 jobs:
@@ -18,16 +20,20 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
+      # The Android SDK on GitHub's ubuntu runners ships with recent
+      # cmdline-tools, so the old android-actions/setup-android@v3 step is
+      # no longer needed (and now fails: it installs the removed 'tools'
+      # package). Gradle 8.7 is invoked via its wrapper equivalent below.
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
 
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
       - name: Build debug APK
-        run: gradle assembleDebug
+        run: gradle assembleDebug --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
